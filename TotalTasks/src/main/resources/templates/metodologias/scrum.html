@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/" lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title th:text="${proyecto.nombreProyecto + ' - Proyecto Scrum'}"></title>
+  <link rel="stylesheet" href="/css/metodologias/scrum.css" />
+  <link rel="shortcut icon" href="../assets/logo.png" type="image/x-icon" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <div th:insert="~{fragmentos/header :: header}"></div>
+
+  <main class="scrum-content">
+    <!-- Encabezado del tablero con acciones -->
+    <div class="acciones-tablero">
+      <h1 th:text="${proyecto.nombreProyecto}"></h1>
+
+      <!-- Botón: Ir al repositorio -->
+      <button th:if="${repositorio != null}"
+        th:attr="onclick='window.open(\'' + ${repositorio.htmlUrl} + '\', \'_blank\')'">
+        <svg aria-label="github" height="16" viewBox="0 0 16 16" width="16">
+          <path
+            d="M7 .175c-3.872 0-7 3.128-7 7 0 3.084 2.013 5.71 4.79 6.65.35.066.482-.153.482-.328v-1.181c-1.947.415-2.363-.941-2.363-.941-.328-.81-.787-1.028-.787-1.028-.634-.438.044-.416.044-.416.7.044 1.071.722 1.071.722.635 1.072 1.641.766 2.035.59.066-.459.24-.765.437-.94-1.553-.175-3.193-.787-3.193-3.456 0-.766.262-1.378.721-1.881-.065-.175-.306-.897.066-1.86 0 0 .59-.197 1.925.722a6.754 6.754 0 0 1 1.75-.24c.59 0 1.203.087 1.75.24 1.335-.897 1.925-.722 1.925-.722.372.963.131 1.685.066 1.86.46.48.722 1.115.722 1.88 0 2.691-1.641 3.282-3.194 3.457.24.219.481.634.481 1.29v1.926c0 .197.131.415.481.328C11.988 12.884 14 10.259 14 7.175c0-3.872-3.128-7-7-7z"
+            fill="var(--color-fondo)" fill-rule="nonzero"></path>
+        </svg>
+        Repositorio
+      </button>
+
+      <!-- Botón: Despliegue web -->
+      <button th:if="${repositorio != null && repositorio.homepage != null}"
+        th:attr="onclick='window.open(\'' + ${repositorio.homepage} + '\', \'_blank\')'">
+        <svg height="16" viewBox="0 0 16 16" width="16">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M7.25 10.75V11.5H8.75V10.75V6.56066L10.2197 8.03033L10.75 8.56066L11.8107 7.5L11.2803 6.96967L8.53033 4.21967C8.23744 3.92678 7.76256 3.92678 7.46967 4.21967L4.71967 6.96967L4.18934 7.5L5.25 8.56066L5.78033 8.03033L7.25 6.56066V10.75ZM14.5 8C14.5 11.5899 11.5899 14.5 8 14.5C4.41015 14.5 1.5 11.5899 1.5 8C1.5 4.41015 4.41015 1.5 8 1.5C11.5899 1.5 14.5 4.41015 14.5 8ZM8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16Z"
+            fill="var(--color-fondo)"></path>
+        </svg>
+        Despliegue web
+      </button>
+
+      <!-- Botones principales -->
+      <button id="personalizarTablero">Personalizar Tablero</button>
+
+      <!-- Botón: Ver estadísticas -->
+      <button th:if="${repositorio != null}" id="botonEstadisticas" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 18.5V4H4V20H20V18.5H5.5Z" fill="var(--color-fondo)" />
+          <path d="M10.5 17V8.00131H12V17H10.5Z" fill="var(--color-fondo)" />
+          <path d="M7 17V12H8.5V17H7Z" fill="var(--color-fondo)" />
+          <path d="M17.5 17V10H19V17H17.5Z" fill="var(--color-fondo)" />
+          <path d="M14 17V5H15.5V17H14Z" fill="var(--color-fondo)" />
+        </svg>
+        Ver estadísticas
+      </button>
+
+      <!-- Formulario oculto con datos del repositorio -->
+      <form id="formularioGithub" style="display: none;" th:if="${repositorio != null}">
+        <input type="hidden" id="repoName" th:value="${repositorio.name}" />
+        <input type="hidden" id="repoFullName" th:value="${repositorio.fullName}" />
+        <input type="hidden" id="repoDescription" th:value="${repositorio.description}" />
+        <input type="hidden" id="repoHtmlUrl" th:value="${repositorio.htmlUrl}" />
+        <input type="hidden" id="repoHomepage" th:value="${repositorio.homepage}" />
+        <input type="hidden" id="repoLanguage" th:value="${repositorio.language}" />
+        <input type="hidden" id="repoStargazers" th:value="${repositorio.stargazersCount}" />
+        <input type="hidden" id="repoForks" th:value="${repositorio.forksCount}" />
+        <input type="hidden" id="repoWatchers" th:value="${repositorio.watchersCount}" />
+        <input type="hidden" id="repoOpenIssues" th:value="${repositorio.openIssuesCount}" />
+        <input type="hidden" id="repoCreatedAt" th:value="${repositorio.createdAt}" />
+        <input type="hidden" id="repoUpdatedAt" th:value="${repositorio.updatedAt}" />
+        <input type="hidden" id="repoPushedAt" th:value="${repositorio.pushedAt}" />
+      </form>
+
+      <!-- Modal de estadísticas -->
+      <div id="modalEstadisticas" class="modal-estadisticas">
+        <div class="modal-contenido">
+          <button class="modal-cerrar" id="cerrarModalEstadisticas">&times;</button>
+          <h2>Estadísticas del Repositorio</h2>
+          <div class="filtros-estadisticas">
+            <button class="filtro-btn" data-filtro="commits">Commits</button>
+            <button class="filtro-btn" data-filtro="lenguajes">Lenguajes</button>
+            <button class="filtro-btn" data-filtro="branches">Ramas</button>
+          </div>
+          <div id="loader" style="text-align:center; margin-bottom:20px;">Cargando estadísticas...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Selector de color para el tablero -->
+    <div id="colorPicker" class="colorPickerContainer">
+      <div class="colorPicker">
+        <p>Elige un color para tu tablero:</p>
+        <div id="color-options" class="color-options">
+          <span class="color-box" data-color="#f87171" style="background-color: #f87171"></span>
+          <span class="color-box" data-color="#60a5fa" style="background-color: #60a5fa"></span>
+          <span class="color-box" data-color="#34d399" style="background-color: #34d399"></span>
+          <span class="color-box" data-color="#fbbf24" style="background-color: #fbbf24"></span>
+          <span class="color-box" data-color="#a78bfa" style="background-color: #a78bfa"></span>
+
+          <!-- Color personalizado -->
+          <button id="personalizarColor" class="custom-Color">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+              stroke="currentColor" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+          <input type="color" class="custom-Color" id="colorSelector"
+            style="visibility: hidden; position: absolute; right: 0; top: 40px; opacity: 0;" />
+        </div>
+      </div>
+    </div>
+    <div class="grid-container">
+      <!-- PRODUCT BACKLOG -->
+      <section id="product-backlog" class="panel">
+        <h2 class="panel-title">Product Backlog</h2>
+        <div class="panel-body grid-inner">
+          <form id="task-form" method="post" action="/scrum/agregarHistoria" class="form-pb">
+            <div class="form-group">
+              <label for="task-title">Título de la historia</label>
+              <input type="text" id="task-title" name="titulo" placeholder="Título de la historia" required />
+            </div>
+            <div class="form-group">
+              <label for="task-desc">Descripción</label>
+              <textarea id="task-desc" name="descripcion" placeholder="Descripción"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="task-points">Story Points</label>
+              <input type="number" id="task-points" name="storyPoints" min="1" max="21" required />
+            </div>
+            <input type="hidden" id="idUsuario" name="idUsuario" th:value="${usuario.idUsuario}" />
+            <input type="hidden" id="idProyecto" name="idProyecto" th:value="${proyecto.idProyecto}" />
+            <button type="submit" class="btn-primary">Añadir Historia</button>
+            <button id="toggle-form-btn" type="button" th:if="${not #lists.isEmpty(historias)}" class="btn-primary"
+              onclick="moverAlSprint();">Mover al sprint</button>
+          </form>
+
+          <table class="table-pb">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Points</th>
+                <th>Prioridad</th>
+                <th>Responsable</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="historia : ${historias}"
+                th:attr="data-id=${historia.idBacklog}, data-proyecto-id=${proyecto.idProyecto}, data-responsable-id=${historia.creador.idUsuario}">
+                <td th:text="${historia.titulo}"></td>
+                <td th:text="${historia.descripcion}"></td>
+                <td>
+                  <span class="badge" th:text="${historia.storyPoints}"></span>
+                </td>
+                <td th:text="${historia.prioridad}"></td>
+                <td th:text="${historia.creador.nombre}"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SPRINT -->
+      <section id="sprint" class="panel">
+        <h2 class="panel-title">Sprint</h2>
+        <div class="panel-body">
+          <button id="comenzar-sprint" th:if="${sprint != null and not #lists.isEmpty(sprint)}"
+            onclick="comenzarSprint()" class="btn-primary">
+            Comenzar Sprint
+          </button>
+          <button id="comenzar-sprint" th:if="${sprint != null and not #lists.isEmpty(sprint)}"
+            onclick="moverTodoAlBacklog()" class="btn-primary">
+            Mover al backlog
+          </button>
+          <table id="sprint-table" class="table-pb">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Desc.</th>
+                <th>Points</th>
+                <th>Prioridad</th>
+                <th>Responsable</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="historia : ${sprint}"
+                th:attr="data-id=${historia.idSprint}, data-proyecto-id=${proyecto.idProyecto}, data-responsable-id=${historia.responsable.idUsuario}">
+                <td th:text="${historia.titulo}"></td>
+                <td th:text="${historia.descripcion}"></td>
+                <td th:text="${historia.storyPoints}"></td>
+                <td th:text="${historia.prioridad}"></td>
+                <td th:text="${historia.responsable.nombre}"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PRODUCT BOARD -->
+      <section id="product-board" class="panel">
+        <h2 class="panel-title">Product Board</h2>
+        <div class="product-board-container">
+          <!-- POR HACER -->
+          <div class="column">
+            <h3>Por Hacer</h3>
+            <ul id="por-hacer" class="tarea-lista">
+              <li th:each="tarea : ${tareasBoard}" th:if="${tarea.estado == 'por_hacer'}"
+                th:attr="data-id=${tarea.idTareaBoard}">
+                <strong th:text="${tarea.titulo}"></strong>
+                <p th:text="${tarea.descripcion}"></p>
+                <small th:text="'Resp: ' + ${tarea.responsable.nombre}"></small><br>
+                <small th:text="'Story Points: ' + ${tarea.storyPoints}"></small><br>
+                <small th:text="'Prioridad: ' + ${tarea.prioridad}"></small>
+              </li>
+            </ul>
+          </div>
+
+          <!-- EN CURSO -->
+          <div class="column">
+            <h3>En Curso</h3>
+            <ul id="en-curso" class="tarea-lista">
+              <li th:each="tarea : ${tareasBoard}" th:if="${tarea.estado == 'en_curso'}"
+                th:attr="data-id=${tarea.idTareaBoard}">
+                <strong th:text="${tarea.titulo}"></strong>
+                <p th:text="${tarea.descripcion}"></p>
+                <small th:text="'Resp: ' + ${tarea.responsable.nombre}"></small><br>
+                <small th:text="'Story Points: ' + ${tarea.storyPoints}"></small><br>
+                <small th:text="'Prioridad: ' + ${tarea.prioridad}"></small>
+              </li>
+            </ul>
+          </div>
+
+          <!-- HECHO -->
+          <div class="column">
+            <h3>Hecho</h3>
+            <ul id="hecho" class="tarea-lista">
+              <li th:each="tarea : ${tareasBoard}" th:if="${tarea.estado == 'hecho'}"
+                th:attr="data-id=${tarea.idTareaBoard}">
+                <strong th:text="${tarea.titulo}"></strong>
+                <p th:text="${tarea.descripcion}"></p>
+                <small th:text="'Resp: ' + ${tarea.responsable.nombre}"></small><br>
+                <small th:text="'Story Points: ' + ${tarea.storyPoints}"></small><br>
+                <small th:text="'Prioridad: ' + ${tarea.prioridad}"></small>
+              </li>
+            </ul>
+            <button id="btn-borrar-hecho" type="button">Borrar tareas hechas</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- CHAT DEL PROYECTO -->
+    <section class="chat-section panel">
+      <h2 class="panel-title" th:text="'Chat del Proyecto: ' + ${proyecto.nombreProyecto}">Chat del Proyecto</h2>
+      <div class="chat-header">
+        <p>
+          <strong>Usuarios conectados:</strong>
+          <span id="usuarios-conectados">0</span>
+        </p>
+      </div>
+      <div class="chat-body">
+        <div id="mensajesRecibidos" class="chat-messages"></div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." />
+        <button type="button" onclick="enviarMensaje()" class="btn-primary">
+          Enviar
+        </button>
+      </div>
+    </section>
+
+    <!-- Modal del temporizador -->
+    <div id="modal-sprint" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h3>Duración del Sprint</h3>
+
+        <label for="duracion">Duración:</label>
+        <input required type="number" id="duracion" min="1">
+
+        <label for="unidad-tiempo">Unidad:</label>
+        <select id="unidad-tiempo">
+          <option value="minutos" selected>Minutos</option>
+          <option value="horas">Horas</option>
+          <option value="dias">Días</option>
+        </select>
+
+        <div class="buttonsModal">
+          <button onclick="confirmarComenzarSprint()">Aceptar</button>
+          <button class="cancelarBoton" onclick="cerrarModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="idProyectoChat" th:value="${proyecto.idProyecto}" />
+    <input type="hidden" id="idUsuarioChat" th:value="${usuario.idUsuario}" />
+    <input type="hidden" id="nombreUsuario" th:value="${usuario.usuario}" />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="/js/chat.js"></script>
+  </main>
+
+  <!-- Footer -->
+  <footer th:insert="~{fragmentos/footer :: footer}"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="/js/metodologias/scrum.js"></script>
+</body>
+
+</html>

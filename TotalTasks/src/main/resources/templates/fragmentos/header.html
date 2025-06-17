@@ -1,0 +1,184 @@
+<header th:fragment="header" id="cabezera" class="cabezera">
+    <!-- Contenedor de logo -->
+    <div class="logo-container">
+        <div class="logo">
+            <img src="/assets/logo.png" alt="Logo TotalTasks">
+        </div>
+    </div>
+
+    <!-- Contenedor de navegación -->
+    <div class="navegacion-container">
+        <nav class="navegacion">
+            <ul>
+                <!-- Enlaces del index -->
+                <li th:if="${paginaActual == 'index'}"><a href="/#">Inicio</a></li>
+                <li th:if="${paginaActual == 'index'}"><a href="/#caracteristicas">Características</a></li>
+                <li th:if="${paginaActual == 'index'}"><a href="/#faq" onclick="openChatbot()">Preguntas Frecuentes</a>
+                </li>
+
+                <!-- Enlaces del dashboard -->
+                <li th:if="${paginaActual != 'index'}">
+                    <a th:if="${usuario != null}" href="/dashboard">Mis proyectos</a>
+                    <a th:if="${usuario == null}" href="/">Ir al inicio</a>
+                </li>
+
+
+                <!-- Ícono de notificaciones (campanita) -->
+                <li th:if="${usuario != null and paginaActual != 'index'}" class="icono-notificaciones">
+                    <button id="notificaciones" class="notificaciones">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span class="contador-notis"
+                            th:if="${notificacionesNoLeidas != null and notificacionesNoLeidas.size() > 0}"
+                            th:text="${notificacionesNoLeidas.size()}"></span>
+                    </button>
+
+                    <div class="notificacionesModal" id="notificacionesModal">
+                        <div class="notificacionesRelative">
+                            <ul class="lista-notificaciones">
+                                <li th:if="${notificacionesNoLeidas == null or notificacionesNoLeidas.isEmpty()}"
+                                    class="mensaje-vacio">
+                                    No tienes notificaciones nuevas.
+                                </li>
+
+
+                                <li th:each="notificacionUsuario  : ${notificacionesNoLeidas}"
+                                    th:attr="data-id-proyecto=${notificacionUsuario.notificacion.proyecto.idProyecto}, onclick='irAProyecto(' + ${notificacionUsuario.notificacion.proyecto.idProyecto} + ')'"
+                                    class="notificacion-item">
+                                    <!-- Mostrar nombre del proyecto -->
+                                    <strong
+                                        th:text="'Proyecto: ' + ${notificacionUsuario.notificacion.proyecto.nombreProyecto}"></strong>
+
+                                    <!-- Mostrar según el tipo de notificación -->
+                                    <div th:switch="${notificacionUsuario.notificacion.tipo}">
+
+                                        <!-- Modificación por administrador -->
+                                        <div th:case="'ADMIN_MODIFICACION'">
+                                            <p><strong>Modificación del proyecto</strong></p>
+                                            <p th:text="${notificacionUsuario.notificacion.mensaje}"></p>
+
+                                        </div>
+
+                                        <!-- Asignación de tarea -->
+                                        <div th:case="'TAREA_ASIGNADA'">
+                                            <p><strong>Nueva tarea asignada:</strong></p>
+                                            <p th:text="${notificacionUsuario.notificacion.mensaje}"></p>
+                                        </div>
+
+                                        <!-- Notificación programada -->
+                                        <div th:case="'RECORDATORIO_FECHA'">
+                                            <p><strong>Recordatorio tarea apunto de finalizar:</strong></p>
+                                            <p th:text="${notificacionUsuario.notificacion.mensaje}"></p>
+
+                                        </div>
+
+
+                                        <!-- Notificación programada -->
+                                        <div th:case="'UNION_USUARIO'">
+                                            <p><strong>Bienvenido al proyecto</strong></p>
+                                            <p th:text="${notificacionUsuario.notificacion.mensaje}"></p>
+
+                                        </div>
+
+                                        <!-- Por defecto -->
+                                        <div th:case="*">
+                                            <p th:text="${notificacionUsuario.notificacion.mensaje}"></p>
+                                        </div>
+                                    </div>
+                                    <div class="leerFecha">
+                                        <span class="fecha"
+                                            th:text="${#dates.format(notificacionUsuario.notificacion.fechaCreacion, 'dd/MM/yyyy HH:mm')}">
+                                        </span>
+                                        <form th:action="@{/leerNotificacion}" method="post">
+                                            <input type="hidden" name="idUsuarioNoti"
+                                                th:value="${notificacionUsuario.idNotificacionUsuario}" />
+                                            <button class="descartarBtn">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                                    fill="currentColor" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M13.485 1.929a1 1 0 0 1 1.414 1.414l-8.243 8.243a1 1 0 0 1-1.414 0L1.1 7.929a1 1 0 1 1 1.414-1.414l3.314 3.314 7.657-7.657z" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="descartarTodo"
+                                th:if="${notificacionesNoLeidas != null and !notificacionesNoLeidas.empty}">
+                                <form th:action="@{/leerTodasLasNotis}" method="post" class="hiddenForm">
+                                    <input type="hidden" name="idUsuario" th:value="${usuario.idUsuario}" />
+                                    <button class="descartarTodoBtn">
+                                        <span>Descartar todo</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                            fill="currentColor" viewBox="0 0 16 16">
+                                            <path
+                                                d="M13.485 1.929a1 1 0 0 1 1.414 1.414l-8.243 8.243a1 1 0 0 1-1.414 0L1.1 7.929a1 1 0 1 1 1.414-1.414l3.314 3.314 7.657-7.657z" />
+                                        </svg>
+                                    </button>
+                                </form>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </li>
+
+                <div class="separador"></div>
+
+                <!-- Mostrar botones de sesión solo si el usuario no está autenticado y no está en el dashboard -->
+                <li th:if="${usuario == null and paginaActual != 'dashboard'}">
+                    <a href="/login" class="boton-login">Iniciar sesión</a>
+                </li>
+                <li th:if="${usuario == null and paginaActual != 'dashboard'}">
+                    <a href="/registro" class="boton-probar" style="color: white;">Pruébala gratis</a>
+                </li>
+
+                <!-- Si el usuario está logueado y está en el index, mostramos "Ir a mi Dashboard" -->
+                <li th:if="${usuario != null and paginaActual == 'index'}">
+                    <a href="/dashboard" class="boton-login">Ir a mi Dashboard</a>
+                </li>
+
+                <!-- Si el usuario está logueado y está en el dashboard, mostramos "Inicio" -->
+                <li th:if="${usuario != null and paginaActual != 'index'}">
+                    <a href="/" class="boton-login">Ir al inicio</a>
+                </li>
+
+                <li th:if="${usuario != null}">
+
+                    <!-- Primero comprobamos si fotoPerfilBase64 está disponible -->
+                    <img th:if="${fotoPerfilBase64 != null}" th:src="'data:image/jpeg;base64,' + ${fotoPerfilBase64}"
+                        alt="Foto de perfil base64" class="avatar" id="avatarMenu">
+
+                    <!-- Si no está disponible fotoPerfilBase64, comprobamos si fotoperfilGoogle tiene un valor -->
+                    <img th:if="${fotoPerfilBase64 == null and !#strings.isEmpty(fotoperfilGoogle)}"
+                        th:src="${fotoperfilGoogle}" alt="Foto de perfil Google" class="avatar" id="avatarMenu"
+                        onerror="this.onerror=null; this.src='/assets/dashboard/foto-perfil.webp';">
+
+                    <!-- Si no está disponible fotoPerfilBase64 ni fotoperfilGoogle, comprobamos si fotoPerfilGithub tiene un valor -->
+                    <img th:if="${fotoPerfilBase64 == null and #strings.isEmpty(fotoperfilGoogle) and !#strings.isEmpty(fotoPerfilGithub)}"
+                        th:src="${fotoPerfilGithub}" alt="Foto de perfil Github" class="avatar" id="avatarMenu">
+
+                    <!-- Si ninguna de las anteriores tiene valor, cargamos la imagen por defecto -->
+                    <img th:if="${fotoPerfilBase64 == null and #strings.isEmpty(fotoperfilGoogle) and #strings.isEmpty(fotoPerfilGithub)}"
+                        th:src="@{/assets/dashboard/foto-perfil.webp}" alt="Foto de perfil por defecto" class="avatar"
+                        id="avatarMenu">
+
+
+
+                    <div class="menu-perfil" id="menuPerfil">
+                        <a th:href="@{/usuarios/miCuenta}">Mi cuenta</a>
+                        <br>
+                        <a th:href="@{/usuarios/cerrarSesion}">Cerrar sesión</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <link rel="stylesheet" href="/css/fragmentos/header.css">
+    <script src="/js/fragmentos/header.js"></script>
+</header>
+
+<div class="header-spacer" id="headerSpacer"></div>

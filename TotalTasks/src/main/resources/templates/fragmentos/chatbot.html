@@ -1,0 +1,28 @@
+<!-- Chatbot Interactivo -->
+<div id="chatbotContainer" class="chatbotContainer" th:fragment="chatbot">
+
+    <!-- Botón flotante para abrir y cerrar chatbot -->
+    <button id="chatToggle" class="chatToggle">
+        <img src="/assets/dashboard/chatbot.png" alt="Chat icon">
+    </button>
+
+    <div id="chatWindow" class="chatWindow">
+        <div id="chatLog" class="chatLog">
+            <div class="chat bot">🤖¡Hola! ¿En qué puedo ayudarte hoy? </div>
+        </div>
+
+        <!-- Opciones como botones -->
+        <div id="chatOptions" class="chatOptions">
+            <button onclick="handleOptionClick('unirme a un proyecto')">🔗 Unirme a un proyecto</button>
+            <button onclick="handleOptionClick('personalizar un proyecto')">🎨 Personalizar Proyecto</button>
+            <button onclick="handleOptionClick('problemas con el login')">🚪 Problemas con el login</button>
+        </div>
+
+    </div>
+    <p id="moreQuestions">¿Tienes más preguntas? Visita nuestra <a href="/faq" title="Ir a preguntas frecuentes">sección
+            de preguntas
+            frecuentes</a>.</p>
+
+    <script src="/js/fragmentos/chatbot.js"></script>
+    <link rel="stylesheet" href="/css/fragmentos/chatbot.css">
+</div>
